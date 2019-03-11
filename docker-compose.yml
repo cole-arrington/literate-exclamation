@@ -1,0 +1,37 @@
+version: '3.1'
+
+services:
+
+  mysql:
+    image: mysql:8.0.15
+    volumes:
+      - ./db/database.sql:/docker-entrypoint-initdb.d/database.sql
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+
+  hardware:
+    build:
+      context: ./app
+      args:
+        - app_dir=hardware
+    environment:
+      - app_file=hardware.py
+    restart: always
+    depends_on:
+      - mysql
+
+  portal:
+    build:
+      context: ./app
+      args:
+        - app_dir=portal
+    environment:
+      - app_file=portal.py
+    restart: always
+    ports:
+      - "5000:5000"
+
+volumes:
+    db_data: {}
