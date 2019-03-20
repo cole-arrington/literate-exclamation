@@ -7,8 +7,13 @@ For local testing, you should install Docker and Docker Compose.
 * Instructions to install Docker can be found here: https://docs.docker.com/install/
 * Instructions to install Compose can be found here: https://docs.docker.com/compose/install/
 
+For deploying to AWS, install Terraform and configure your AWS CLI
+
+* Instructions to install Terraform can be found here: https://www.terraform.io/intro/index.html 
+* Instructions to install AWS CLI can be found here: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html 
+
 ## Usage
-To deploy the initial environment, run the following command:
+To deploy the local environment, run the following command:
 
 ```bash
 docker-compose up --build
@@ -16,7 +21,27 @@ docker-compose up --build
 
 This command will build the containers and bring up the environment. Note that you can add the ```-d``` flag to the end of the command to run detached.
 
-This command can also be used to deploy new versions of the application code, as it will rebuild anything in the app subdirectories
+This command can also be used to deploy new versions of the application code, as it will rebuild anything in the app subdirectories.
+
+To build your docker images and push them to your ECR, run the following:
+
+```bash
+./build-docker.sh
+```
+
+Note that you should modify the ECR url to suit your environment in both the build-docker.sh file and the relevant Dockerfiles.
+
+Once the images are pushed you can set up your AWS environment and deploy the images by running the following:
+
+```bash
+terraform init
+terraform plan terraform/
+terraform apply terraform/
+```
+
+The output will include a link to your load balancer DNS, such as rescale-load-balancer-933590460.us-east-1.elb.amazonaws.com from the currently running instance. Visiting this URL will show the application running (on port 5000 but accessible through the LB at the default port)
+
+Updates to the application can be performed by running the build.docker.sh file again, which will push new versions of the image to ECR.
 
 
 ## Explanation of choices
@@ -32,7 +57,7 @@ This command can also be used to deploy new versions of the application code, as
 1. Changed request string in portal.py to ```requests.get('http://hardware:5001/hardware/').json()``` since container can be referenced by service name
 1. For the requirement to create the virtual networks for the public and private sections of the app: there is no need to explicitly define networks as docker-compose handles this implicitly. The hardware and database service are private by default, and portal is public because port 5000 is exposed explicitly
 1. For scaling manually, you can scale with ```docker-compose up --scale hardware=2```, etc. 
-1. Script to deploy new builds: ```docker-compose up --build -d``` - builds app and runs a detached ```docker-compose up``` command
+1. Script to deploy new builds: ```./build-docker.sh``` - builds app and pushes new image
 
 ## Notes and Extra Credit
 

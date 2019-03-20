@@ -5,7 +5,7 @@ application = Flask(__name__)
 
 @application.route('/')
 def dashboard():
-    result = requests.get('http://hardware:5001/hardware/').json()
+    result = requests.get('http://0.0.0.0:5001/hardware/').json()
     hardware = [
         '{} - {}: {}'.format(r['provider'], r['name'], r['availability'])
         for r in result

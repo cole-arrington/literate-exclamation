@@ -7,10 +7,11 @@ COPY requirements.txt /requirements.txt
 RUN pip install -r requirements.txt
 
 # Create copy layer for app code
-ARG app_dir
-COPY $app_dir /app
+COPY . /app
 WORKDIR /app
 
+EXPOSE 5000
+
 # Start application
-ENV app_file="$app_file"
-CMD ["sh", "-c", "python $app_file"]
+ENTRYPOINT ["python"]
+CMD ["portal.py"]
